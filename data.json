@@ -1,0 +1,1857 @@
+{
+    "TACTICS": {
+        "DYNAMIC": {
+            "id": "DYNAMIC",
+            "name": "Dynamic Entry",
+            "desc": "Speed & Aggression. High risk, high reward.",
+            "modifiers": {
+                "reflexes": 15,
+                "aim": 10,
+                "discipline": -20
+            }
+        },
+        "DELIBERATE": {
+            "id": "DELIBERATE",
+            "name": "Deliberate Clear",
+            "desc": "Slow & Methodical. Maximizes safety and precision.",
+            "modifiers": {
+                "reflexes": -10,
+                "aim": 20,
+                "discipline": 20
+            }
+        },
+        "STEALTH": {
+            "id": "STEALTH",
+            "name": "Stealth Approach",
+            "desc": "Silent infiltration. Discipline is key.",
+            "modifiers": {
+                "reflexes": 5,
+                "aim": -10,
+                "discipline": 25
+            }
+        }
+    },
+    "SQUAD_SLOTS": [
+        {
+            "id": 0,
+            "name": "POINTMAN",
+            "role": "Breaching & Entry",
+            "stat": "Reflexes",
+            "masteryKey": "point"
+        },
+        {
+            "id": 1,
+            "name": "TEAM LEAD",
+            "role": "Command & Control",
+            "stat": "Discipline",
+            "masteryKey": "lead"
+        },
+        {
+            "id": 2,
+            "name": "REAR GUARD",
+            "role": "Support & Flanks",
+            "stat": "Aim",
+            "masteryKey": "rear"
+        }
+    ],
+    "TRAITS": {
+        "VETERAN": {
+            "name": "Veteran",
+            "desc": "Immune to panic. +10 Discipline under high stress.",
+            "effect": "panicImmune",
+            "statBonus": {
+                "discipline": 10
+            },
+            "stressThreshold": true
+        },
+        "NERVOUS": {
+            "name": "Nervous",
+            "desc": "-15 Discipline when stress exceeds 50.",
+            "effect": "stressPenalty",
+            "statPenalty": {
+                "discipline": -15
+            },
+            "stressThreshold": 50
+        },
+        "AGGRESSIVE": {
+            "name": "Aggressive",
+            "desc": "+10 Reflexes, -10 Discipline.",
+            "effect": "statMod",
+            "statBonus": {
+                "reflexes": 10
+            },
+            "statPenalty": {
+                "discipline": -10
+            }
+        },
+        "CALM": {
+            "name": "Calm",
+            "desc": "Gains 5 less stress per mission.",
+            "effect": "stressResist",
+            "stressReduction": 5
+        },
+        "MEDIC": {
+            "name": "Medic",
+            "desc": "Heals a wounded teammate for 10 HP after mission.",
+            "effect": "postMissionHeal",
+            "healAmount": 10
+        },
+        "EAGER": {
+            "name": "Eager",
+            "desc": "+20% XP gain from missions.",
+            "effect": "xpBoost",
+            "xpMultiplier": 1.2
+        },
+        "IRONWALL": {
+            "name": "Ironwall",
+            "desc": "Takes 25% less damage.",
+            "effect": "damageResist",
+            "damageReduction": 0.25
+        },
+        "SHARPSHOOTER": {
+            "name": "Sharpshooter",
+            "desc": "+15 Aim. Less effective in CQB.",
+            "effect": "statMod",
+            "statBonus": {
+                "aim": 15
+            },
+            "statPenalty": {
+                "reflexes": -5
+            }
+        },
+        "LEADBYEXAMPLE": {
+            "name": "Lead by Example",
+            "desc": "Nearby operators gain +5 to all stats.",
+            "effect": "teamBoost",
+            "teamBonus": 5
+        },
+        "RECKLESS": {
+            "name": "Reckless",
+            "desc": "+20 Reflexes, takes 30% more damage.",
+            "effect": "reckless",
+            "statBonus": {
+                "reflexes": 20
+            },
+            "damageIncrease": 0.3
+        }
+    },
+    "ECONOMY": {
+        "startingBudget": 5000,
+        "missionRewardBase": 800,
+        "civilianPenalty": 500,
+        "recruitBaseCost": 1500,
+        "healCostPerHP": 15,
+        "restCostPerFatigue": 10,
+        "therapyCostPerStress": 12
+    },
+    "REPUTATION": {
+        "startingRep": 0,
+        "successGain": 15,
+        "perfectGain": 25,
+        "failureLoss": -10,
+        "kiaLoss": -5,
+        "tiers": [
+            {
+                "name": "Unknown",
+                "threshold": 0,
+                "minStat": 30,
+                "maxStat": 50,
+                "maxTraits": 1,
+                "recruitCostMult": 1.0,
+                "missionChoices": 2
+            },
+            {
+                "name": "Recognized",
+                "threshold": 25,
+                "minStat": 35,
+                "maxStat": 55,
+                "maxTraits": 1,
+                "recruitCostMult": 0.95,
+                "missionChoices": 2
+            },
+            {
+                "name": "Respected",
+                "threshold": 60,
+                "minStat": 40,
+                "maxStat": 65,
+                "maxTraits": 2,
+                "recruitCostMult": 0.9,
+                "missionChoices": 3
+            },
+            {
+                "name": "Renowned",
+                "threshold": 120,
+                "minStat": 45,
+                "maxStat": 75,
+                "maxTraits": 2,
+                "recruitCostMult": 0.85,
+                "missionChoices": 3
+            },
+            {
+                "name": "Legendary",
+                "threshold": 200,
+                "minStat": 55,
+                "maxStat": 85,
+                "maxTraits": 3,
+                "recruitCostMult": 0.8,
+                "missionChoices": 4
+            }
+        ]
+    },
+    "INITIAL_ROSTER": [
+        {
+            "id": 1,
+            "name": "Sgt. Miller",
+            "callsign": "GHOST",
+            "status": "READY",
+            "stats": {
+                "aim": 85,
+                "reflexes": 70,
+                "discipline": 90,
+                "health": 100,
+                "maxHealth": 100
+            },
+            "fatigue": 0,
+            "stress": 0,
+            "traits": [
+                "VETERAN",
+                "CALM"
+            ],
+            "level": 3,
+            "exp": 450,
+            "nextLevel": 1000,
+            "mastery": {
+                "point": 1,
+                "lead": 3,
+                "rear": 1
+            }
+        },
+        {
+            "id": 2,
+            "name": "Ofc. Jenkins",
+            "callsign": "ROOK",
+            "status": "READY",
+            "stats": {
+                "aim": 45,
+                "reflexes": 50,
+                "discipline": 30,
+                "health": 100,
+                "maxHealth": 100
+            },
+            "fatigue": 0,
+            "stress": 0,
+            "traits": [
+                "NERVOUS",
+                "EAGER"
+            ],
+            "level": 1,
+            "exp": 0,
+            "nextLevel": 500,
+            "mastery": {
+                "point": 0,
+                "lead": 0,
+                "rear": 0
+            }
+        },
+        {
+            "id": 3,
+            "name": "Ofc. Cole",
+            "callsign": "HAMMER",
+            "status": "READY",
+            "stats": {
+                "aim": 60,
+                "reflexes": 65,
+                "discipline": 40,
+                "health": 100,
+                "maxHealth": 100
+            },
+            "fatigue": 0,
+            "stress": 0,
+            "traits": [
+                "AGGRESSIVE"
+            ],
+            "level": 1,
+            "exp": 100,
+            "nextLevel": 500,
+            "mastery": {
+                "point": 1,
+                "lead": 0,
+                "rear": 0
+            }
+        },
+        {
+            "id": 4,
+            "name": "Ofc. Vance",
+            "callsign": "DOC",
+            "status": "READY",
+            "stats": {
+                "aim": 55,
+                "reflexes": 40,
+                "discipline": 70,
+                "health": 100,
+                "maxHealth": 100
+            },
+            "fatigue": 0,
+            "stress": 0,
+            "traits": [
+                "MEDIC"
+            ],
+            "level": 2,
+            "exp": 200,
+            "nextLevel": 750,
+            "mastery": {
+                "point": 0,
+                "lead": 1,
+                "rear": 2
+            }
+        },
+        {
+            "id": 5,
+            "name": "Ofc. Nakamura",
+            "callsign": "SHADE",
+            "status": "READY",
+            "stats": {
+                "aim": 50,
+                "reflexes": 55,
+                "discipline": 60,
+                "health": 100,
+                "maxHealth": 100
+            },
+            "fatigue": 0,
+            "stress": 0,
+            "traits": [
+                "CALM"
+            ],
+            "level": 1,
+            "exp": 50,
+            "nextLevel": 500,
+            "mastery": {
+                "point": 0,
+                "lead": 0,
+                "rear": 1
+            }
+        },
+        {
+            "id": 6,
+            "name": "Ofc. Briggs",
+            "callsign": "BRAVO",
+            "status": "READY",
+            "stats": {
+                "aim": 70,
+                "reflexes": 45,
+                "discipline": 50,
+                "health": 100,
+                "maxHealth": 100
+            },
+            "fatigue": 0,
+            "stress": 0,
+            "traits": [
+                "SHARPSHOOTER"
+            ],
+            "level": 1,
+            "exp": 0,
+            "nextLevel": 500,
+            "mastery": {
+                "point": 0,
+                "lead": 0,
+                "rear": 0
+            }
+        }
+    ],
+    "MISSIONS": [
+        {
+            "id": 101,
+            "title": "CASE #2024-001: SUNDAY DINNER",
+            "location": "2404 Oak St. // Residential",
+            "brief": "Domestic disturbance escalated. Suspect armed (knife). Civilians present. Low-Light conditions.",
+            "difficulty": 1,
+            "modifiers": [
+                "Low Light"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Breaching Front Door",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Child spotted in hallway",
+                    "intervention": {
+                        "prompt": "A child is standing in the hallway, frozen in fear. Suspect is yelling from the kitchen.",
+                        "choices": [
+                            {
+                                "text": "Calmly guide child to safety (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Rush past to suspect (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Have rear guard extract child (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Clearing Hallway",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspect barricading kitchen door",
+                    "intervention": {
+                        "prompt": "Suspect is pushing furniture against the kitchen door. You hear a second voice inside.",
+                        "choices": [
+                            {
+                                "text": "Force entry now (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Talk him down through door (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Kitchen Entry (Suspect Location)",
+                    "check": "reflexes",
+                    "slot": 0
+                }
+            ],
+            "reward": 500
+        },
+        {
+            "id": 102,
+            "title": "CASE #2024-007: MIDNIGHT PHARMACY",
+            "location": "Greenfield Mall // Commercial",
+            "brief": "Armed robbery in progress at 24h pharmacy. Two suspects, one confirmed firearm. Security guard wounded.",
+            "difficulty": 2,
+            "modifiers": [
+                "Confined Space",
+                "Civilian Hostage"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Side Entrance Breach",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Sweeping Aisles (Suspect 1)",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Hostage spotted behind counter",
+                    "intervention": {
+                        "prompt": "HOSTAGE IN LINE OF FIRE. Suspect is using civilian as shield.",
+                        "choices": [
+                            {
+                                "text": "Negotiate (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Flash & Grab (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Precision Shot (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": -10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspect 2 emerging from back room",
+                    "intervention": {
+                        "prompt": "Second suspect heard racking a shotgun behind the stockroom door.",
+                        "choices": [
+                            {
+                                "text": "Breach stockroom (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Smoke grenade & clear (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Cover angles, wait him out (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Final Sweep & Extraction",
+                    "check": "aim",
+                    "slot": 2
+                }
+            ],
+            "reward": 800
+        },
+        {
+            "id": 103,
+            "title": "CASE #2024-015: THE CELLAR",
+            "location": "14 Birchwood Ln. // Basement Level",
+            "brief": "Suspected meth lab in residential basement. Unknown number of hostiles. Hazmat risk. Extremely confined.",
+            "difficulty": 3,
+            "modifiers": [
+                "Confined Space",
+                "Low Light",
+                "Hazmat"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Descending Staircase",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Chemical fumes detected",
+                    "intervention": {
+                        "prompt": "Strong chemical smell. Team has limited gas mask supply — only enough for one safe pass.",
+                        "choices": [
+                            {
+                                "text": "Push through fast (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Methodical advance with masks (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Send sharpshooter ahead with cover (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 0
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "First Room — Chemical Hazard",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspect fleeing toward tunnel exit",
+                    "intervention": {
+                        "prompt": "SUSPECT FLEEING through narrow tunnel. Risk of booby traps.",
+                        "choices": [
+                            {
+                                "text": "Pursue on Foot (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Hold & Call Perimeter (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Lab Takedown (Multiple Hostiles)",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Securing Evidence & Final Suspect",
+                    "check": "reflexes",
+                    "slot": 0
+                }
+            ],
+            "reward": 1200
+        },
+        {
+            "id": 104,
+            "title": "CASE #2024-022: IRON GATE",
+            "location": "Eastport Warehouse District // Industrial",
+            "brief": "Weapons cache located in abandoned warehouse. Intel suggests 4-6 armed hostiles. Possible IED threat.",
+            "difficulty": 4,
+            "modifiers": [
+                "Large Area",
+                "IED Risk",
+                "Multiple Hostiles"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Warehouse Main Door Breach",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Clearing Loading Dock (IED Check)",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Tripwire spotted",
+                    "intervention": {
+                        "prompt": "Pointman spots a tripwire across the corridor. Could be connected to IED or alarm.",
+                        "choices": [
+                            {
+                                "text": "Disarm carefully (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Step over and advance (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -10
+                            },
+                            {
+                                "text": "Find alternate route (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Engaging Hostile Group Alpha",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Second group flanking from catwalk",
+                    "intervention": {
+                        "prompt": "CONTACTS ON CATWALK. They have elevation advantage.",
+                        "choices": [
+                            {
+                                "text": "Suppressive Fire (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Rush Stairwell (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Smoke & Reposition (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Securing Weapons Cache Room",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Final Hostile — Warehouse Office",
+                    "check": "reflexes",
+                    "slot": 0
+                }
+            ],
+            "reward": 1800
+        },
+        {
+            "id": 105,
+            "title": "CASE #2024-031: BLACK TITHE",
+            "location": "St. Marian Cathedral // Historic",
+            "brief": "Bomb threat at public event. 200+ civilians. Suspect barricaded in bell tower with detonator. Sniper authorized.",
+            "difficulty": 5,
+            "modifiers": [
+                "High Civilian Presence",
+                "Bomb Threat",
+                "Elevated Target"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Infiltrating Side Chapel",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Panicking crowd blocks entrance",
+                    "intervention": {
+                        "prompt": "Civilians are stampeding toward the exit, blocking your team's path to the bell tower.",
+                        "choices": [
+                            {
+                                "text": "Redirect crowd calmly (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Push through the crowd (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -10
+                            },
+                            {
+                                "text": "Take alternate route via scaffolding (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 0
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Evacuating Nave (Crowd Control)",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspect threatens to detonate",
+                    "intervention": {
+                        "prompt": "SUSPECT ON RADIO: \"One more step and this whole place goes.\" Detonator confirmed in hand.",
+                        "choices": [
+                            {
+                                "text": "Open Negotiation (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Sniper — Green Light (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": -15
+                            },
+                            {
+                                "text": "Create distraction, rush tower (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Bell Tower Ascent",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Final Confrontation — Bell Tower",
+                    "check": "aim",
+                    "slot": 2
+                }
+            ],
+            "reward": 3000
+        },
+        {
+            "id": 106,
+            "title": "CASE #2024-003: SILENT ALARM",
+            "location": "First National Bank // Downtown",
+            "brief": "Bank alarm tripped after hours. Thermal shows 3 figures inside. Vault door breached. Likely professional crew.",
+            "difficulty": 2,
+            "modifiers": [
+                "Low Light",
+                "Alarm Active"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Rear Service Entrance",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Guard found unconscious",
+                    "intervention": {
+                        "prompt": "Night guard found zip-tied and unconscious. He's breathing but needs medical attention.",
+                        "choices": [
+                            {
+                                "text": "Stabilize guard first (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Mark position, push forward (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Rear guard stays with him (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 0
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Clearing Lobby & Offices",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspects rigging vault with explosives",
+                    "intervention": {
+                        "prompt": "You hear drilling from the vault room. If they finish, the evidence is gone.",
+                        "choices": [
+                            {
+                                "text": "Immediate breach (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Cut power to building (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Vault Room Takedown",
+                    "check": "aim",
+                    "slot": 2
+                }
+            ],
+            "reward": 700
+        },
+        {
+            "id": 107,
+            "title": "CASE #2024-009: OVERPASS",
+            "location": "I-94 Highway Bridge // Outdoor",
+            "brief": "Man on bridge threatening to jump. Has a firearm. Traffic stopped. Negotiator requested backup.",
+            "difficulty": 1,
+            "modifiers": [
+                "Outdoor",
+                "High Visibility",
+                "Weather: Rain"
+            ],
+            "phases": [
+                {
+                    "type": "CLEAR",
+                    "text": "Securing Perimeter",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Subject raises weapon",
+                    "intervention": {
+                        "prompt": "Subject points firearm at approaching officers. He's screaming incoherently.",
+                        "choices": [
+                            {
+                                "text": "Continue talking, stay calm (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Non-lethal takedown (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Positioned sniper standby (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Subject moving toward edge",
+                    "intervention": {
+                        "prompt": "Subject drops weapon but moves toward railing. He's going to jump.",
+                        "choices": [
+                            {
+                                "text": "Sprint and grab (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Verbal de-escalation (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Resolving Situation",
+                    "check": "discipline",
+                    "slot": 1
+                }
+            ],
+            "reward": 400
+        },
+        {
+            "id": 108,
+            "title": "CASE #2024-012: POOL HALL",
+            "location": "Lucky 8 Billiards // Entertainment District",
+            "brief": "Shots fired at pool hall. Gang-related. Multiple wounded. Shooters still inside. 15-20 patrons trapped.",
+            "difficulty": 3,
+            "modifiers": [
+                "High Civilian Presence",
+                "Multiple Hostiles",
+                "Confined Space"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Front Door Stack & Breach",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Wounded civilian near entrance",
+                    "intervention": {
+                        "prompt": "Civilian with gunshot wound crawling toward door. Shooters have line of sight to entrance.",
+                        "choices": [
+                            {
+                                "text": "Drag civilian to cover (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Provide covering fire (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Negotiate ceasefire for medic (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Engaging Shooter 1 (Bar Area)",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Second shooter taking hostage",
+                    "intervention": {
+                        "prompt": "Shooter 2 grabs a patron and puts gun to their head. \"Back off or I drop him!\"",
+                        "choices": [
+                            {
+                                "text": "Engage in negotiation (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Flank from pool table side (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Headshot — clear angle (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": -15
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Clearing Back Rooms",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Final Sweep — Kitchen & Storage",
+                    "check": "reflexes",
+                    "slot": 0
+                }
+            ],
+            "reward": 1100
+        },
+        {
+            "id": 109,
+            "title": "CASE #2024-018: SCHOOLYARD",
+            "location": "Lincoln Elementary // Suburban",
+            "brief": "Disgruntled former employee. Building evacuated but 2 staff members unaccounted for. Subject armed with rifle.",
+            "difficulty": 4,
+            "modifiers": [
+                "Large Area",
+                "Missing Civilians",
+                "Active Shooter Protocol"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "North Wing Entry",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Clearing Classrooms A-Wing",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Staff member hiding in closet",
+                    "intervention": {
+                        "prompt": "Muffled crying from supply closet. Could be trapped staff — or a trap.",
+                        "choices": [
+                            {
+                                "text": "Announce police & open slowly (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Breach closet fast (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Cover from distance, ask them to come out (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Suspect spotted in gymnasium",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Subject opens fire from stage",
+                    "intervention": {
+                        "prompt": "Subject firing from behind stage curtains. Large open space with minimal cover.",
+                        "choices": [
+                            {
+                                "text": "Return fire from bleachers (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Flank through backstage door (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Deploy flashbang and advance (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Second staff member found injured",
+                    "intervention": {
+                        "prompt": "Second missing staff member found in hallway, wounded. Subject may double back.",
+                        "choices": [
+                            {
+                                "text": "Medic attends, team holds position (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Carry & extract immediately (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Final Confrontation — Administration Office",
+                    "check": "reflexes",
+                    "slot": 0
+                }
+            ],
+            "reward": 2000
+        },
+        {
+            "id": 110,
+            "title": "CASE #2024-025: HOTEL NEON",
+            "location": "The Grand Marquis Hotel // 14th Floor",
+            "brief": "VIP protection detail gone wrong. Client barricaded. Former bodyguard turned hostile. Elevator access only.",
+            "difficulty": 3,
+            "modifiers": [
+                "Confined Space",
+                "Elevator Approach",
+                "Single Entry"
+            ],
+            "phases": [
+                {
+                    "type": "INTERVENTION",
+                    "text": "Elevator approach decision",
+                    "intervention": {
+                        "prompt": "Elevator is the only quick route to floor 14. Stairs take 8 minutes. Suspect may harm VIP.",
+                        "choices": [
+                            {
+                                "text": "Take elevator, accept ambush risk (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -10
+                            },
+                            {
+                                "text": "Stairs — slow but safe (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Elevator to floor 13, climb up (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BREACH",
+                    "text": "Suite Hallway Entry",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Clearing Adjacent Rooms",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspect demands helicopter",
+                    "intervention": {
+                        "prompt": "Suspect on phone: demands helicopter in 10 minutes or VIP dies. Sounds agitated.",
+                        "choices": [
+                            {
+                                "text": "Stall with fake compliance (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Breach while he's distracted (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Sniper through window from adjacent building (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": -10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Penthouse Suite Entry",
+                    "check": "discipline",
+                    "slot": 1
+                }
+            ],
+            "reward": 1300
+        },
+        {
+            "id": 111,
+            "title": "CASE #2024-028: TRAINYARD",
+            "location": "Southside Rail Depot // Industrial",
+            "brief": "Drug trafficking bust. Intel: armed guards in cargo containers. K-9 unit detected explosives. Night operation.",
+            "difficulty": 3,
+            "modifiers": [
+                "Low Light",
+                "Open Terrain",
+                "Explosives Risk"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Perimeter Fence Entry",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Guard dog alert",
+                    "intervention": {
+                        "prompt": "Guard dog barking at your position. Handler will investigate in seconds.",
+                        "choices": [
+                            {
+                                "text": "Neutralize dog quietly (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Fall back, reposition (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Tranquilizer from distance (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 0
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Sweeping Container Row",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Booby-trapped container",
+                    "intervention": {
+                        "prompt": "Container #7 has visible wiring on the handle. Could be an alarm or worse.",
+                        "choices": [
+                            {
+                                "text": "Disarm the device (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Skip container, clear others (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Force open from side panel (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -10
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Engaging Guards at Main Cargo",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Train Car — Final Suspects",
+                    "check": "reflexes",
+                    "slot": 0
+                }
+            ],
+            "reward": 1150
+        },
+        {
+            "id": 112,
+            "title": "CASE #2024-033: RED CARPET",
+            "location": "City Hall Gala // Government",
+            "brief": "Assassination threat at mayor's fundraiser. 300+ attendees. Suspect in crowd, armed. Undercover insertion required.",
+            "difficulty": 4,
+            "modifiers": [
+                "High Civilian Presence",
+                "Undercover",
+                "Political Target"
+            ],
+            "phases": [
+                {
+                    "type": "CLEAR",
+                    "text": "Blending into Crowd",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspicious individual spotted",
+                    "intervention": {
+                        "prompt": "Man matching suspect description near bar. Reaching into jacket pocket.",
+                        "choices": [
+                            {
+                                "text": "Confront discreetly (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Tackle immediately (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -10
+                            },
+                            {
+                                "text": "Observe from distance (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "False alarm — real suspect identified on balcony",
+                    "intervention": {
+                        "prompt": "Radio: actual suspect located on second-floor balcony overlooking stage. Mayor about to speak.",
+                        "choices": [
+                            {
+                                "text": "Sprint up stairs (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Signal sniper team (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Evacuate mayor first (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Balcony Approach",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspect has dead man's switch",
+                    "intervention": {
+                        "prompt": "Suspect reveals vest. \"I let go of this button, we all go.\" Dead man's switch confirmed.",
+                        "choices": [
+                            {
+                                "text": "Keep him talking, EOD en route (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Rush and hold the switch (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -15
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Neutralizing Threat",
+                    "check": "discipline",
+                    "slot": 1
+                }
+            ],
+            "reward": 2200
+        },
+        {
+            "id": 113,
+            "title": "CASE #2024-037: CARGO SHIP",
+            "location": "MV Prosperity // Harbor",
+            "brief": "Human trafficking operation. Containers on anchored cargo ship. Coast Guard requests tactical support. Tight corridors below deck.",
+            "difficulty": 5,
+            "modifiers": [
+                "Maritime",
+                "Confined Space",
+                "Multiple Decks",
+                "Civilians at Risk"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Boarding via Port Side Ladder",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Crew member spotted on deck",
+                    "intervention": {
+                        "prompt": "A crew member is on deck smoking. Could be a lookout or innocent sailor.",
+                        "choices": [
+                            {
+                                "text": "Detain quietly (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Observe and bypass (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Cover from hiding, let him leave (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 0
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Upper Deck Sweep",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Descending to Hold — Narrow Stairwell",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Traffickers executing evidence destruction",
+                    "intervention": {
+                        "prompt": "Sounds of machinery and screaming below deck. They're destroying evidence — or worse.",
+                        "choices": [
+                            {
+                                "text": "Full speed breach into hold (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Flash & clear systematically (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Precision shots through porthole (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 0
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Captain threatens to sink the ship",
+                    "intervention": {
+                        "prompt": "Captain at engine room controls: \"I'll scuttle this ship before I let you take me!\"",
+                        "choices": [
+                            {
+                                "text": "Rush engine room (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": -10
+                            },
+                            {
+                                "text": "Negotiate surrender (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Sniper through engine room window (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": -5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Engine Room Final Confrontation",
+                    "check": "aim",
+                    "slot": 2
+                }
+            ],
+            "reward": 3500
+        },
+        {
+            "id": 114,
+            "title": "CASE #2024-005: CORNER STORE",
+            "location": "Sal's Convenience // Residential",
+            "brief": "Silent alarm. Single suspect with handgun. One clerk inside. Suspect appears under the influence.",
+            "difficulty": 1,
+            "modifiers": [
+                "Small Space",
+                "Impaired Suspect"
+            ],
+            "phases": [
+                {
+                    "type": "INTERVENTION",
+                    "text": "Approach decision",
+                    "intervention": {
+                        "prompt": "Suspect is visible through front window, waving gun erratically. Clerk is behind counter.",
+                        "choices": [
+                            {
+                                "text": "Announce police, demand surrender (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Rear entry through stockroom (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Cover from outside, wait for opening (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 0
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BREACH",
+                    "text": "Entry Breach",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspect stumbling, gun wavering",
+                    "intervention": {
+                        "prompt": "Suspect is barely standing. Gun is pointed at the floor but he could raise it at any moment.",
+                        "choices": [
+                            {
+                                "text": "Taser deployment (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Verbal commands to drop weapon (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Securing the Scene",
+                    "check": "discipline",
+                    "slot": 1
+                }
+            ],
+            "reward": 350
+        },
+        {
+            "id": 115,
+            "title": "CASE #2024-040: UNDERGROUND",
+            "location": "Metro Station Delta // Subway System",
+            "brief": "Multiple IEDs planted on metro platforms. Two suspects identified on CCTV. Station partially evacuated. Trains halted.",
+            "difficulty": 5,
+            "modifiers": [
+                "Underground",
+                "IED Risk",
+                "Civilian Presence",
+                "Multi-Level"
+            ],
+            "phases": [
+                {
+                    "type": "BREACH",
+                    "text": "Descending via Maintenance Access",
+                    "check": "discipline",
+                    "slot": 1
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "First IED located on Platform A",
+                    "intervention": {
+                        "prompt": "Device found strapped to support column. Timer reads 12:00 and counting.",
+                        "choices": [
+                            {
+                                "text": "Attempt disarm (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Evacuate platform, pursue suspects (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 0
+                            },
+                            {
+                                "text": "Mark and relay to EOD, establish perimeter (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CLEAR",
+                    "text": "Tunnel Sweep Toward Platform B",
+                    "check": "reflexes",
+                    "slot": 0
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Suspect spotted planting second device",
+                    "intervention": {
+                        "prompt": "Suspect 1 is actively wiring a device to the tracks on Platform B. He hasn't seen you.",
+                        "choices": [
+                            {
+                                "text": "Silent takedown (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 5
+                            },
+                            {
+                                "text": "Announce and demand surrender (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": -5
+                            },
+                            {
+                                "text": "Non-lethal shot from cover (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": 0
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "CONTACT",
+                    "text": "Suspect 2 Opens Fire from Ticket Hall",
+                    "check": "aim",
+                    "slot": 2
+                },
+                {
+                    "type": "INTERVENTION",
+                    "text": "Final IED — train approaching",
+                    "intervention": {
+                        "prompt": "Third device found ON THE TRACKS. A service train is inbound. 90 seconds to impact.",
+                        "choices": [
+                            {
+                                "text": "Run to tracks, manual disarm (Discipline)",
+                                "stat": "discipline",
+                                "slot": 1,
+                                "bonus": 10
+                            },
+                            {
+                                "text": "Radio control room to halt train (Reflexes)",
+                                "stat": "reflexes",
+                                "slot": 0,
+                                "bonus": 15
+                            },
+                            {
+                                "text": "Precision shot at device from platform (Aim)",
+                                "stat": "aim",
+                                "slot": 2,
+                                "bonus": -20
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "BOSS",
+                    "text": "Final Sweep & All-Clear",
+                    "check": "discipline",
+                    "slot": 1
+                }
+            ],
+            "reward": 3800
+        }
+    ],
+    "RECRUIT_NAMES": [
+        "Ofc. Torres",
+        "Ofc. Park",
+        "Ofc. Reeves",
+        "Ofc. Dunn",
+        "Ofc. Walsh",
+        "Ofc. Ortiz",
+        "Ofc. Kim",
+        "Ofc. Blake",
+        "Ofc. Chen",
+        "Ofc. Murphy",
+        "Ofc. Hayes",
+        "Ofc. Rivera",
+        "Ofc. Stone",
+        "Ofc. Lee",
+        "Ofc. Grant",
+        "Ofc. Fox",
+        "Ofc. Cruz",
+        "Ofc. Bell",
+        "Ofc. Quinn",
+        "Ofc. Ward",
+        "Ofc. Silva",
+        "Ofc. Cho",
+        "Ofc. Volkov",
+        "Ofc. Hartman",
+        "Ofc. Okafor",
+        "Ofc. Petrov",
+        "Ofc. Yamada",
+        "Ofc. Douglas",
+        "Ofc. Ferreira",
+        "Ofc. Andersen",
+        "Ofc. Ramos",
+        "Ofc. Lau",
+        "Ofc. Beckett",
+        "Ofc. Moreno",
+        "Ofc. Singh",
+        "Ofc. Kowalski",
+        "Ofc. Ndiaye",
+        "Ofc. Hoffman",
+        "Ofc. Tanaka",
+        "Ofc. Johansson"
+    ],
+    "RECRUIT_CALLSIGNS": [
+        "NOVA",
+        "FANG",
+        "BOLT",
+        "VIPER",
+        "ECHO",
+        "FROST",
+        "BLITZ",
+        "DAGGER",
+        "TALON",
+        "PATCH",
+        "SMOKE",
+        "EMBER",
+        "TITAN",
+        "RAVEN",
+        "FLINT",
+        "HAWK",
+        "ZERO",
+        "WRAITH",
+        "SABER",
+        "STEEL",
+        "PUMA",
+        "LYNX",
+        "ATLAS",
+        "MESA",
+        "OAK",
+        "RUSH",
+        "CINDER",
+        "BRISK",
+        "ONYX",
+        "COBALT",
+        "LANCER",
+        "PIKE",
+        "FURY",
+        "ORACLE",
+        "SPECTRE",
+        "CARBON",
+        "APEX",
+        "NIMBUS",
+        "CIPHER",
+        "BEACON"
+    ]
+}
