@@ -1,350 +1,6 @@
-const { useState, useEffect, useRef, useCallback } = React;
+// ===== MAIN GAME COMPONENT =====
+// Depends on: React hooks (from components.js), all globals, all utility files, all components
 
-// --- GAME DATA & CONSTANTS (Populated via fetch) ---
-let TACTICS = {};
-let SQUAD_SLOTS = [];
-let INITIAL_ROSTER = [];
-let MISSIONS = [];
-let TRAITS = {};
-let ECONOMY = {};
-let REPUTATION = {};
-let RECRUIT_NAMES = [];
-let RECRUIT_CALLSIGNS = [];
-
-// --- UTILITY FUNCTIONS ---
-const roll = (max = 100) => Math.floor(Math.random() * max) + 1;
-const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
-const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const generateId = () => Date.now() + Math.floor(Math.random() * 10000);
-
-// --- SAVE / LOAD ---
-const SAVE_KEY = 'squad_leader_protocol_save';
-
-const saveGame = (state) => {
-    try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-    } catch (e) { console.warn('Save failed', e); }
-};
-
-const loadGame = () => {
-    try {
-        const raw = localStorage.getItem(SAVE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch (e) { return null; }
-};
-
-const clearSave = () => localStorage.removeItem(SAVE_KEY);
-
-// --- TRAIT HELPERS ---
-const getTraitData = (traitId) => TRAITS[traitId] || null;
-
-const applyTraitStatMods = (soldier) => {
-    let mods = { aim: 0, reflexes: 0, discipline: 0 };
-    soldier.traits.forEach(tId => {
-        const t = getTraitData(tId);
-        if (!t) return;
-        if (t.statBonus) Object.entries(t.statBonus).forEach(([k, v]) => mods[k] = (mods[k] || 0) + v);
-        if (t.statPenalty) Object.entries(t.statPenalty).forEach(([k, v]) => mods[k] = (mods[k] || 0) + v);
-        // Stress-based trait penalty (NERVOUS)
-        if (t.effect === 'stressPenalty' && soldier.stress > (t.stressThreshold || 50)) {
-            if (t.statPenalty) Object.entries(t.statPenalty).forEach(([k, v]) => mods[k] = (mods[k] || 0) + v);
-        }
-        // Stress-based trait bonus (VETERAN under stress)
-        if (t.stressThreshold === true && soldier.stress > 50) {
-            if (t.statBonus) Object.entries(t.statBonus).forEach(([k, v]) => mods[k] = (mods[k] || 0) + v);
-        }
-    });
-    return mods;
-};
-
-const hasTrait = (soldier, traitId) => soldier.traits.includes(traitId);
-const isTraitEffect = (soldier, effect) => soldier.traits.some(tId => { const t = getTraitData(tId); return t && t.effect === effect; });
-
-const getDamageMultiplier = (soldier) => {
-    let mult = 1;
-    soldier.traits.forEach(tId => {
-        const t = getTraitData(tId);
-        if (!t) return;
-        if (t.damageReduction) mult -= t.damageReduction;
-        if (t.damageIncrease) mult += t.damageIncrease;
-    });
-    return Math.max(0.1, mult);
-};
-
-const getXpMultiplier = (soldier) => {
-    let mult = 1;
-    soldier.traits.forEach(tId => {
-        const t = getTraitData(tId);
-        if (t && t.xpMultiplier) mult *= t.xpMultiplier;
-    });
-    return mult;
-};
-
-const getStressReduction = (soldier) => {
-    let red = 0;
-    soldier.traits.forEach(tId => {
-        const t = getTraitData(tId);
-        if (t && t.stressReduction) red += t.stressReduction;
-    });
-    return red;
-};
-
-const getTeamBonus = (squad) => {
-    let bonus = 0;
-    squad.forEach(s => {
-        if (!s) return;
-        s.traits.forEach(tId => {
-            const t = getTraitData(tId);
-            if (t && t.teamBonus) bonus += t.teamBonus;
-        });
-    });
-    return bonus;
-};
-
-// --- REPUTATION HELPERS ---
-const getRepTier = (rep) => {
-    if (!REPUTATION.tiers || REPUTATION.tiers.length === 0) return { name: 'Unknown', minStat: 30, maxStat: 50, maxTraits: 1, recruitCostMult: 1.0, missionChoices: 2 };
-    let tier = REPUTATION.tiers[0];
-    for (const t of REPUTATION.tiers) {
-        if (rep >= t.threshold) tier = t;
-    }
-    return tier;
-};
-
-// --- RECRUIT GENERATOR ---
-const generateRookie = (existingNames, existingCallsigns, reputation = 0) => {
-    const tier = getRepTier(reputation);
-    const availNames = RECRUIT_NAMES.filter(n => !existingNames.includes(n));
-    const availCallsigns = RECRUIT_CALLSIGNS.filter(c => !existingCallsigns.includes(c));
-    const name = availNames.length > 0 ? pickRandom(availNames) : `Ofc. R-${roll(999)}`;
-    const callsign = availCallsigns.length > 0 ? pickRandom(availCallsigns) : `X-${roll(99)}`;
-
-    const statRange = tier.maxStat - tier.minStat;
-    const aim = tier.minStat + roll(statRange);
-    const reflexes = tier.minStat + roll(statRange);
-    const discipline = tier.minStat + roll(statRange);
-    const avgStat = (aim + reflexes + discipline) / 3;
-
-    const allTraitKeys = Object.keys(TRAITS);
-    const traitCount = Math.min(tier.maxTraits, Math.random() > 0.5 ? 2 : 1);
-    const traits = [];
-    while (traits.length < traitCount && traits.length < allTraitKeys.length) {
-        const t = pickRandom(allTraitKeys);
-        if (!traits.includes(t)) traits.push(t);
-    }
-
-    const baseCost = ECONOMY.recruitBaseCost + (avgStat - 45) * 30;
-    const cost = Math.floor(baseCost * (tier.recruitCostMult || 1.0));
-
-    return {
-        id: generateId(),
-        name, callsign, status: 'READY',
-        stats: { aim, reflexes, discipline, health: 100, maxHealth: 100 },
-        fatigue: 0, stress: 0,
-        traits,
-        level: 1, exp: 0, nextLevel: 500,
-        mastery: { point: 0, lead: 0, rear: 0 },
-        cost
-    };
-};
-
-// --- COMPONENTS ---
-
-const getAvatarUrl = (seed, size = 48) => {
-    return `https://api.dicebear.com/9.x/pixel-art/svg?seed=${encodeURIComponent(seed)}&size=${size}`;
-};
-
-const Avatar = ({ seed, size = 36, className = '' }) => (
-    <img
-        src={getAvatarUrl(seed, size * 2)}
-        width={size}
-        height={size}
-        className={`avatar ${className}`}
-        alt={seed}
-        loading="lazy"
-    />
-);
-
-// --- MISSION MAP COMPONENT ---
-const MissionMap = ({ phases, currentPhaseIndex }) => {
-    const phaseIcons = {
-        'BREACH': '🚪',
-        'CLEAR': '🔍',
-        'CONTACT': '💥',
-        'BOSS': '💀',
-        'INTERVENTION': '⚠'
-    };
-
-    return (
-        <div className="mission-map">
-            <div className="map-track">
-                {phases.map((phase, idx) => {
-                    let status = 'pending';
-                    if (idx < currentPhaseIndex) status = 'done';
-                    if (idx === currentPhaseIndex) status = 'active';
-
-                    return (
-                        <React.Fragment key={idx}>
-                            <div className={`map-node ${status}`}>
-                                <div className="map-node-icon">{phaseIcons[phase.type] || '•'}</div>
-                                <div className="map-node-label">{phase.type}</div>
-                            </div>
-                            {idx < phases.length - 1 && (
-                                <div className={`map-connector ${idx < currentPhaseIndex ? 'done' : ''}`} />
-                            )}
-                        </React.Fragment>
-                    );
-                })}
-            </div>
-        </div>
-    );
-};
-
-const StatBar = ({ label, value, max = 100, color = "bg-emerald-500" }) => (
-    <div className="stat-bar-row">
-        <span className="stat-label">{label}</span>
-        <div className="stat-bar-bg">
-            <div className={`stat-bar-fill ${color}`} style={{ width: `${Math.min((value / max) * 100, 100)}%` }}></div>
-        </div>
-        <span className="stat-value">{value}</span>
-    </div>
-);
-
-const HumanTollBar = ({ label, value, max = 100, color }) => (
-    <div className="stat-bar-row">
-        <span className="stat-label">{label}</span>
-        <div className="stat-bar-bg">
-            <div className={`stat-bar-fill ${color}`} style={{ width: `${Math.min((value / max) * 100, 100)}%` }}></div>
-        </div>
-        <span className="stat-value" style={{ color: value > 70 ? '#ef4444' : value > 40 ? '#f59e0b' : '#6b7280' }}>{value}</span>
-    </div>
-);
-
-const SoldierCard = ({ soldier, onSelect, isSelected, isDead, slotIndex, compact }) => {
-    const statusColor = soldier.stats.health <= 0 ? 'text-red-600' : (soldier.stats.health < 50 ? 'text-orange-500' : 'text-emerald-500');
-    const slotName = slotIndex !== undefined ? SQUAD_SLOTS[slotIndex]?.name : null;
-
-    const fatigueWarning = soldier.fatigue > 60;
-    const stressWarning = soldier.stress > 60;
-
-    return (
-        <div
-            onClick={() => !isDead && onSelect && onSelect(soldier)}
-            className={`soldier-card ${isSelected ? 'selected' : ''} ${isDead ? 'dead' : ''}`}
-        >
-            {slotName && <div className="slot-badge">{slotName}</div>}
-
-            <div className="soldier-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Avatar seed={soldier.callsign} size={compact ? 28 : 36} />
-                    <div>
-                        <div className={`soldier-name ${statusColor}`}>
-                            <span>{soldier.name}</span>
-                            <span className="level-badge">LVL {soldier.level}</span>
-                        </div>
-                        <div className="soldier-meta">
-                            '{soldier.callsign}' // {soldier.traits.map(t => TRAITS[t]?.name || t).join(", ")}
-                        </div>
-                    </div>
-                </div>
-                <div className="soldier-hp">
-                    <span className={statusColor}>{soldier.stats.health <= 0 ? 'KIA' : `${soldier.stats.health}HP`}</span>
-                </div>
-            </div>
-
-            {!compact && (
-                <>
-                    <StatBar label="RFLX" value={soldier.stats.reflexes} color="bar-blue" />
-                    <StatBar label="DISC" value={soldier.stats.discipline} color="bar-purple" />
-                    <StatBar label="AIM" value={soldier.stats.aim} color="bar-red" />
-
-                    <div className="toll-bars">
-                        <HumanTollBar label="FTG" value={soldier.fatigue} color="bar-fatigue" />
-                        <HumanTollBar label="STR" value={soldier.stress} color="bar-stress" />
-                    </div>
-
-                    {(fatigueWarning || stressWarning) && (
-                        <div className="warning-text">
-                            {fatigueWarning && '⚠ HIGH FATIGUE '}
-                            {stressWarning && '⚠ HIGH STRESS'}
-                        </div>
-                    )}
-
-                    <div className="xp-bar-bg">
-                        <div className="xp-bar-fill" style={{ width: `${(soldier.exp / soldier.nextLevel) * 100}%` }}></div>
-                    </div>
-                </>
-            )}
-        </div>
-    );
-};
-
-const LogEntry = ({ entry }) => {
-    const typeClass = `log-type-${entry.type || 'info'}`;
-    return (
-        <div className={`log-entry ${typeClass}`}>
-            <span className="log-time">[{entry.time}]</span>
-            <span>{entry.text}</span>
-        </div>
-    );
-};
-
-const BudgetDisplay = ({ budget }) => (
-    <div className="budget-hud">
-        <span className="budget-label">BUDGET</span>
-        <span className={`budget-amount ${budget < 1000 ? 'low' : ''}`}>${budget.toLocaleString()}</span>
-    </div>
-);
-
-// --- INTERVENTION COMPONENT ---
-const InterventionOverlay = ({ intervention, squad, onChoice }) => {
-    const [timeLeft, setTimeLeft] = useState(100);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 0) {
-                    clearInterval(interval);
-                    // Auto-pick worst option (last one)
-                    onChoice(intervention.choices[intervention.choices.length - 1]);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 100); // 10 seconds total
-        return () => clearInterval(interval);
-    }, []);
-
-    return (
-        <div className="intervention-overlay">
-            <div className="intervention-box">
-                <div className="intervention-alert">⚠ COMMAND DECISION REQUIRED</div>
-                <div className="intervention-prompt">{intervention.prompt}</div>
-                <div className="intervention-timer">
-                    <div className="intervention-timer-fill" style={{ width: `${timeLeft}%` }}></div>
-                </div>
-                <div className="intervention-choices">
-                    {intervention.choices.map((choice, idx) => {
-                        const soldier = squad[choice.slot];
-                        const soldierName = soldier ? soldier.name : 'N/A';
-                        return (
-                            <button
-                                key={idx}
-                                onClick={() => onChoice(choice)}
-                                className="intervention-btn"
-                            >
-                                <div className="intervention-btn-text">{choice.text}</div>
-                                <div className="intervention-btn-who">{soldierName} [{choice.stat.toUpperCase()}]</div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// --- MAIN GAME COMPONENT ---
 const Game = () => {
     const [gameState, setGameState] = useState('TITLE');
     const [roster, setRoster] = useState([]);
@@ -365,6 +21,7 @@ const Game = () => {
     const [intervention, setIntervention] = useState(null);
     const [interventionResolver, setInterventionResolver] = useState(null);
     const [currentPhaseIndex, setCurrentPhaseIndex] = useState(-1);
+    const [liveSquad, setLiveSquad] = useState([null, null, null]);
 
     const logsEndRef = useRef(null);
 
@@ -375,8 +32,20 @@ const Game = () => {
     // --- INIT: Load or New Game ---
     const startNewGame = () => {
         const startRep = REPUTATION.startingRep || 0;
+        // Generate a fresh random roster instead of using static data
+        const initialRoster = [];
+        const startingCount = INITIAL_ROSTER.length || 4;
+        for (let i = 0; i < startingCount; i++) {
+            initialRoster.push(generateRookie(
+                initialRoster.map(r => r.name),
+                initialRoster.map(r => r.callsign),
+                startRep
+            ));
+        }
+        // Remove cost field from initial recruits (they're free)
+        const cleanRoster = initialRoster.map(({ cost, ...rest }) => rest);
         const newState = {
-            roster: JSON.parse(JSON.stringify(INITIAL_ROSTER)),
+            roster: cleanRoster,
             deadOperators: [],
             budget: ECONOMY.startingBudget,
             reputation: startRep,
@@ -389,7 +58,7 @@ const Game = () => {
         setMissionCount(0);
         saveGame(newState);
         generateMissionChoices(0, startRep);
-        setGameState('BRIEFING');
+        setGameState('INTRO');
     };
 
     const continueGame = (save) => {
@@ -434,6 +103,37 @@ const Game = () => {
     };
 
     const timeRef = useRef("22:00:00");
+    const speedRef = useRef(1.4);
+    const pauseRef = useRef(false);
+    const [speed, setSpeed] = useState(0);
+    const [paused, setPaused] = useState(false);
+
+    const SPEED_SETTINGS = [
+        { label: '▶', mult: 1.4 },
+        { label: '▶▶', mult: 1.0 },
+        { label: '▶▶▶', mult: 0.4 },
+    ];
+
+    const changeSpeed = (idx) => {
+        setSpeed(idx);
+        speedRef.current = SPEED_SETTINGS[idx].mult;
+        pauseRef.current = false;
+        setPaused(false);
+    };
+
+    const togglePause = () => {
+        const next = !pauseRef.current;
+        pauseRef.current = next;
+        setPaused(next);
+    };
+
+    const wait = async (baseMs) => {
+        const ms = Math.floor(baseMs * speedRef.current);
+        await new Promise(r => setTimeout(r, ms));
+        while (pauseRef.current) {
+            await new Promise(r => setTimeout(r, 100));
+        }
+    };
 
     const addLog = (text, type = 'info') => {
         const [h, m, s] = timeRef.current.split(':').map(Number);
@@ -445,11 +145,13 @@ const Game = () => {
         setLogs(prev => [...prev, { time: newTime, text, type }]);
     };
 
-    // --- MISSION EXECUTION ---
     const runMission = async () => {
         setGameState('EXECUTION');
         setLogs([]);
         setCurrentPhaseIndex(-1);
+        speedRef.current = SPEED_SETTINGS[0].mult;
+        pauseRef.current = false;
+        setSpeed(0);
         timeRef.current = "22:00:00";
         setSimulationTime("22:00:00");
         addLog(`INITIATING OP: ${currentMission.title}`, 'command');
@@ -460,8 +162,9 @@ const Game = () => {
 
         let activeSquad = selectedSquad.map(s => s ? JSON.parse(JSON.stringify(s)) : null);
         const teamBonus = getTeamBonus(activeSquad);
+        setLiveSquad(activeSquad.map(s => s ? { ...s } : null));
 
-        await new Promise(r => setTimeout(r, 1000));
+        await wait(1000);
 
         let failed = false;
         const modifiers = selectedTactic.modifiers;
@@ -474,8 +177,8 @@ const Game = () => {
             // --- INTERVENTION PHASE ---
             if (phase.type === 'INTERVENTION' && phase.intervention) {
                 addLog(`>>> ${phase.text}`, 'command');
-                await new Promise(r => setTimeout(r, 1000));
-                addLog(`⚠ ${phase.intervention.prompt}`, 'critical');
+                await wait(1000);
+                addLog(`\u26a0 ${phase.intervention.prompt}`, 'critical');
 
                 // Show intervention UI and wait for player choice
                 const choice = await new Promise((resolve) => {
@@ -496,8 +199,8 @@ const Game = () => {
                     break;
                 }
 
-                addLog(`DECISION: ${choice.text} — ${actor.name} takes action.`, 'command');
-                await new Promise(r => setTimeout(r, 800));
+                addLog(`DECISION: ${choice.text} \u2014 ${actor.name} takes action.`, 'command');
+                await wait(800);
 
                 const traitMods = applyTraitStatMods(actor);
                 const baseStat = actor.stats[choice.stat];
@@ -511,7 +214,7 @@ const Game = () => {
                 const totalScore = finalSkill + rollVal;
 
                 addLog(`CHECK: ${actor.name} [${choice.stat.toUpperCase()} ${finalSkill}] rolled ${rollVal}`, 'check');
-                await new Promise(r => setTimeout(r, 1200));
+                await wait(1200);
 
                 if (totalScore > difficulty + 40) {
                     addLog(`>> PERFECT EXECUTION. Crisis averted.`, 'success');
@@ -527,13 +230,14 @@ const Game = () => {
                         addLog(`*** MAN DOWN! ${actor.name} KIA! ***`, 'critical');
                     }
                 }
-                await new Promise(r => setTimeout(r, 1500));
+                await wait(1500);
+                setLiveSquad(activeSquad.map(s => s ? { ...s } : null));
                 continue;
             }
 
             // --- NORMAL PHASE ---
             addLog(`>>> PHASE: ${phase.text}`, 'command');
-            await new Promise(r => setTimeout(r, 1500));
+            await wait(1500);
 
             let actingSoldier = activeSquad[phase.slot];
             let roleName = SQUAD_SLOTS[phase.slot].name;
@@ -551,9 +255,9 @@ const Game = () => {
                 addLog(`${roleName} (${actingSoldier.name}) takes lead.`, 'info');
             }
 
-            await new Promise(r => setTimeout(r, 800));
+            await wait(800);
 
-            // THE CHECK — now with fatigue/stress/trait modifiers
+            // THE CHECK
             const statName = phase.check;
             const traitMods = applyTraitStatMods(actingSoldier);
             const baseStat = actingSoldier.stats[statName];
@@ -566,14 +270,13 @@ const Game = () => {
             const rollVal = roll(100);
             const totalScore = finalSkill + rollVal;
 
-            // Show penalties in log if relevant
             const penalties = [];
             if (fatiguePenalty > 0) penalties.push(`-${fatiguePenalty} FTG`);
             if (stressPenalty > 0) penalties.push(`-${stressPenalty} STR`);
             const penaltyStr = penalties.length > 0 ? ` (${penalties.join(', ')})` : '';
 
             addLog(`CHECK: ${actingSoldier.name} [${statName.toUpperCase()} ${finalSkill}${penaltyStr}]...`, 'check');
-            await new Promise(r => setTimeout(r, 1200));
+            await wait(1200);
 
             if (totalScore > difficulty + 40) {
                 addLog(`>> PERFECT EXECUTION.`, 'success');
@@ -593,7 +296,6 @@ const Game = () => {
 
                 if (actingSoldier.stats.health <= 0) {
                     addLog(`*** MAN DOWN! ${actingSoldier.name} KIA! ***`, 'critical');
-                    // Stress spike for KIA
                     activeSquad.forEach(s => {
                         if (s && s.stats.health > 0) s.stress = clamp((s.stress || 0) + 10 + roll(10), 0, 100);
                     });
@@ -607,7 +309,8 @@ const Game = () => {
                 });
             }
 
-            await new Promise(r => setTimeout(r, 1500));
+            await wait(1500);
+            setLiveSquad(activeSquad.map(s => s ? { ...s } : null));
         }
 
         // Final status
@@ -622,7 +325,8 @@ const Game = () => {
 
         updateRosterAfterMission(activeSquad, failed, reward);
 
-        setTimeout(() => setGameState('DEBRIEF'), 3000);
+        await wait(2000);
+        setGameState('DEBRIEF');
     };
 
     const handleInterventionChoice = (choice) => {
@@ -641,7 +345,6 @@ const Game = () => {
                 const missionState = missionSquad[squadIndex];
                 const survived = missionState.stats.health > 0;
 
-                // Fatigue & Stress accumulation
                 const baseFatigueGain = 15 + roll(10);
                 const baseStressGain = (failed ? 10 : 5) + roll(10);
                 const stressReduction = getStressReduction(soldier);
@@ -652,12 +355,10 @@ const Game = () => {
                     0, 100
                 );
 
-                // XP Logic
                 let xpGain = failed ? 50 : 200;
                 if (!survived) xpGain = 0;
                 xpGain = Math.floor(xpGain * getXpMultiplier(soldier));
 
-                // Mastery
                 const newMastery = { ...soldier.mastery };
                 if (survived) {
                     const masteryKey = SQUAD_SLOTS[squadIndex]?.masteryKey;
@@ -666,7 +367,6 @@ const Game = () => {
                     }
                 }
 
-                // Level Up
                 let newExp = soldier.exp + xpGain;
                 let newLevel = soldier.level;
                 let newNextLevel = soldier.nextLevel;
@@ -707,6 +407,15 @@ const Game = () => {
             return soldier;
         });
 
+        // Passive recovery for operators NOT on the mission
+        updatedRoster.forEach(soldier => {
+            const wasOnMission = missionSquad.some(ms => ms && ms.id === soldier.id);
+            if (!wasOnMission && soldier.stats.health > 0) {
+                soldier.stats.health = Math.min(soldier.stats.maxHealth, soldier.stats.health + 10);
+                soldier.fatigue = Math.max(0, soldier.fatigue - 15);
+            }
+        });
+
         // MEDIC trait: post-mission heal
         const medics = updatedRoster.filter(s => hasTrait(s, 'MEDIC') && s.stats.health > 0 && missionSquad.some(ms => ms && ms.id === s.id));
         medics.forEach(medic => {
@@ -720,7 +429,6 @@ const Game = () => {
             }
         });
 
-        // Separate alive from dead
         const aliveRoster = updatedRoster.filter(s => s.stats.health > 0 || !missionSquad.some(ms => ms && ms.id === s.id));
         const finalRoster = aliveRoster.filter(s => s.status !== 'KIA');
 
@@ -808,7 +516,6 @@ const Game = () => {
         doSave();
         generateMissionChoices(missionCount, reputation);
         if (roster.filter(s => s.stats.health > 0).length < 3) {
-            // Force recruit if not enough alive
             setBaseTab('recruit');
             setGameState('BASE');
         } else {
@@ -852,6 +559,64 @@ const Game = () => {
         );
     }
 
+    // --- INTRO SCREEN ---
+    if (gameState === 'INTRO') {
+        return (
+            <div className="screen-center">
+                <div className="intro-screen">
+                    <div className="title-badge">OPERATIONAL BRIEFING</div>
+                    <h1 className="intro-title">WELCOME, COMMANDER</h1>
+                    <div className="title-divider"></div>
+
+                    <div className="intro-content">
+                        <p>You have been assigned command of a tactical response unit. Your mission: lead your squad through high-risk operations, manage your resources, and build your reputation.</p>
+
+                        <div className="intro-steps">
+                            <div className="intro-step">
+                                <span className="intro-step-icon">🎯</span>
+                                <div>
+                                    <strong>BRIEFING</strong>
+                                    <span>Choose from available operations based on your reputation tier</span>
+                                </div>
+                            </div>
+                            <div className="intro-step">
+                                <span className="intro-step-icon">📝</span>
+                                <div>
+                                    <strong>PLANNING</strong>
+                                    <span>Assign operators to squad slots and select a tactical approach</span>
+                                </div>
+                            </div>
+                            <div className="intro-step">
+                                <span className="intro-step-icon">⚡</span>
+                                <div>
+                                    <strong>EXECUTION</strong>
+                                    <span>Watch the mission unfold — make critical decisions during interventions</span>
+                                </div>
+                            </div>
+                            <div className="intro-step">
+                                <span className="intro-step-icon">🏠</span>
+                                <div>
+                                    <strong>BASE</strong>
+                                    <span>Heal, rest, and recruit operators between missions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="intro-tips">
+                            <p>⚠ Operators accumulate <strong>fatigue</strong> and <strong>stress</strong> over time — manage them or face penalties.</p>
+                            <p>† Death is permanent. Lost operators are gone forever.</p>
+                            <p>★ Your <strong>reputation</strong> grows with successful missions and unlocks better recruits.</p>
+                        </div>
+                    </div>
+
+                    <button onClick={() => setGameState('BRIEFING')} className="btn-primary btn-lg">
+                        PROCEED TO FIRST MISSION »
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     // --- BRIEFING ---
     if (gameState === 'BRIEFING') {
         return (
@@ -877,7 +642,7 @@ const Game = () => {
                                 className="mission-card"
                             >
                                 <div className="mission-difficulty">
-                                    {'★'.repeat(mission.difficulty)}{'☆'.repeat(5 - mission.difficulty)}
+                                    {'\u2605'.repeat(mission.difficulty)}{'\u2606'.repeat(5 - mission.difficulty)}
                                 </div>
                                 <h2 className="mission-title">{mission.title}</h2>
                                 <div className="mission-location">{mission.location}</div>
@@ -893,7 +658,7 @@ const Game = () => {
                     </div>
 
                     <button onClick={() => setGameState('BASE')} className="btn-secondary btn-back">
-                        ← RETURN TO BASE
+                        \u2190 RETURN TO BASE
                     </button>
                 </div>
             </div>
@@ -937,13 +702,11 @@ const Game = () => {
                         <button onClick={() => setSelectedSquad([null, null, null])} className="btn-text">CLEAR SQUAD</button>
                     </div>
 
-                    {/* Mission Info */}
                     <div className="mission-info-strip">
                         <span>{currentMission.title}</span>
-                        <span className="difficulty-stars">{'★'.repeat(currentMission.difficulty)}</span>
+                        <span className="difficulty-stars">{'\u2605'.repeat(currentMission.difficulty)}</span>
                     </div>
 
-                    {/* Tactic Selector */}
                     <div className="tactic-grid">
                         {Object.values(TACTICS).map(tactic => (
                             <div
@@ -964,7 +727,6 @@ const Game = () => {
                         ))}
                     </div>
 
-                    {/* Squad Slots */}
                     <div className="squad-slots">
                         <h3 className="subsection-title">Squad Assignments</h3>
                         {SQUAD_SLOTS.map((slot, idx) => {
@@ -996,7 +758,6 @@ const Game = () => {
                         })}
                     </div>
 
-                    {/* Execute Button */}
                     <div className="execute-section">
                         <button
                             disabled={!isReady}
@@ -1021,7 +782,26 @@ const Game = () => {
                         <h1 className="exec-title">LIVE FEED // {currentMission.title}</h1>
                         <div className="exec-tactic">PROTOCOL: {selectedTactic.name}</div>
                     </div>
-                    <div className="exec-clock">{simulationTime}</div>
+                    <div className="exec-controls">
+                        <div className="speed-buttons">
+                            {SPEED_SETTINGS.map((s, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => changeSpeed(idx)}
+                                    className={`speed-btn ${speed === idx && !paused ? 'active' : ''}`}
+                                >
+                                    {s.label}
+                                </button>
+                            ))}
+                            <button
+                                onClick={togglePause}
+                                className={`speed-btn pause ${paused ? 'active' : ''}`}
+                            >
+                                {paused ? '▶' : '⏸'}
+                            </button>
+                        </div>
+                        <div className="exec-clock">{simulationTime}</div>
+                    </div>
                 </div>
 
                 <div className="exec-log-container">
@@ -1032,27 +812,55 @@ const Game = () => {
                     </div>
                 </div>
 
-                {/* Mission Map */}
                 <MissionMap phases={currentMission.phases} currentPhaseIndex={currentPhaseIndex} />
 
                 <div className="exec-squad-strip">
-                    {selectedSquad.map((s, idx) => (
+                    {liveSquad.map((s, idx) => (
                         <div key={idx} className="exec-squad-card">
                             {s && <Avatar seed={s.callsign} size={28} className="exec-avatar" />}
-                            <div>
+                            <div style={{ flex: 1 }}>
                                 <div className="exec-squad-role">{SQUAD_SLOTS[idx].name}</div>
                                 <div className="exec-squad-name">{s ? s.name : "EMPTY"}</div>
+                                {s && (
+                                    <div className="exec-squad-bars">
+                                        <div className="exec-mini-bar">
+                                            <div className={`exec-mini-fill ${s.stats.health <= 30 ? 'bar-red' : 'bar-green'}`} style={{ width: `${s.stats.health}%` }}></div>
+                                        </div>
+                                        <div className="exec-mini-bar">
+                                            <div className="exec-mini-fill bar-stress" style={{ width: `${s.stress}%` }}></div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
+                            {s && (
+                                <div className="exec-tooltip">
+                                    <div className="exec-tooltip-name">{s.name} '{s.callsign}'</div>
+                                    <div className="exec-tooltip-stats">
+                                        <span>AIM {s.stats.aim}</span>
+                                        <span>RFLX {s.stats.reflexes}</span>
+                                        <span>DISC {s.stats.discipline}</span>
+                                    </div>
+                                    <div className="exec-tooltip-status">
+                                        <span>HP: {s.stats.health}/{s.stats.maxHealth || 100}</span>
+                                        <span>FTG: {s.fatigue}</span>
+                                        <span>STR: {s.stress}</span>
+                                    </div>
+                                    <div className="exec-tooltip-traits">
+                                        {s.traits.map(t => TRAITS[t]?.name || t).join(', ')}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
 
-                {/* Intervention Overlay */}
                 {intervention && (
                     <InterventionOverlay
                         intervention={intervention}
-                        squad={selectedSquad}
+                        squad={liveSquad}
                         onChoice={handleInterventionChoice}
+                        difficulty={50 + (currentMission.difficulty * 12)}
+                        tacticModifiers={selectedTactic.modifiers}
                     />
                 )}
             </div>
@@ -1107,7 +915,7 @@ const Game = () => {
                         {recentlyKilled.map(s => (
                             <div key={s.id} className="debrief-row kia">
                                 <div className="debrief-soldier">
-                                    <div className="debrief-level">†</div>
+                                    <div className="debrief-level">\u2020</div>
                                     <div>
                                         <div className="debrief-name">{s.name} '{s.callsign}'</div>
                                         <div className="debrief-meta">KILLED IN ACTION</div>
@@ -1151,11 +959,10 @@ const Game = () => {
 
                 {tooFewAlive && (
                     <div className="alert-critical">
-                        ⚠ CRITICAL: Less than 3 operators available. Recruit new members before deploying.
+                        \u26a0 CRITICAL: Less than 3 operators available. Recruit new members before deploying.
                     </div>
                 )}
 
-                {/* Tab Navigation */}
                 <div className="base-tabs">
                     {['barracks', 'hospital', 'recruit', 'memorial'].map(tab => (
                         <button
@@ -1166,16 +973,15 @@ const Game = () => {
                             }}
                             className={`base-tab ${baseTab === tab ? 'active' : ''}`}
                         >
-                            {tab === 'barracks' && '🏠 '}
-                            {tab === 'hospital' && '🏥 '}
-                            {tab === 'recruit' && '👤 '}
-                            {tab === 'memorial' && '✝ '}
+                            {tab === 'barracks' && '\ud83c\udfe0 '}
+                            {tab === 'hospital' && '\ud83c\udfe5 '}
+                            {tab === 'recruit' && '\ud83d\udc64 '}
+                            {tab === 'memorial' && '\u271d '}
                             {tab.toUpperCase()}
                         </button>
                     ))}
                 </div>
 
-                {/* Tab Content */}
                 <div className="base-content">
                     {/* BARRACKS */}
                     {baseTab === 'barracks' && (
@@ -1242,7 +1048,7 @@ const Game = () => {
                                                 </button>
                                             )}
                                             {!needsHeal && !needsTherapy && (
-                                                <div className="status-ok">✓ FIT FOR DUTY</div>
+                                                <div className="status-ok">\u2713 FIT FOR DUTY</div>
                                             )}
                                         </div>
                                     </div>
@@ -1258,10 +1064,10 @@ const Game = () => {
                                 <div>
                                     <h3 className="subsection-title">Available Recruits</h3>
                                     <p className="rep-recruit-info">
-                                        Tier: {getRepTier(reputation).name} // Stats: {getRepTier(reputation).minStat}–{getRepTier(reputation).maxStat} // Max Traits: {getRepTier(reputation).maxTraits}
+                                        Tier: {getRepTier(reputation).name} // Stats: {getRepTier(reputation).minStat}\u2013{getRepTier(reputation).maxStat} // Max Traits: {getRepTier(reputation).maxTraits}
                                     </p>
                                 </div>
-                                <button onClick={refreshRecruitPool} className="btn-text">↻ REFRESH POOL</button>
+                                <button onClick={refreshRecruitPool} className="btn-text">\u21bb REFRESH POOL</button>
                             </div>
                             <div className="base-grid">
                                 {recruitPool.map(rookie => (
@@ -1289,7 +1095,7 @@ const Game = () => {
                                 <div className="base-grid">
                                     {deadOperators.map(s => (
                                         <div key={s.id} className="memorial-card">
-                                            <div className="memorial-cross">✝</div>
+                                            <div className="memorial-cross">\u271d</div>
                                             <div className="memorial-name">{s.name}</div>
                                             <div className="memorial-callsign">'{s.callsign}'</div>
                                             <div className="memorial-details">
@@ -1304,7 +1110,6 @@ const Game = () => {
                     )}
                 </div>
 
-                {/* Deploy Button */}
                 <div className="base-deploy">
                     <button
                         onClick={goToNextMission}
@@ -1320,48 +1125,3 @@ const Game = () => {
 
     return null;
 };
-
-// --- APP WRAPPER ---
-const App = () => {
-    const [loaded, setLoaded] = useState(false);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        fetch('data.json')
-            .then(r => {
-                if (!r.ok) throw new Error("Failed to load core data.");
-                return r.json();
-            })
-            .then(data => {
-                TACTICS = data.TACTICS;
-                SQUAD_SLOTS = data.SQUAD_SLOTS;
-                INITIAL_ROSTER = data.INITIAL_ROSTER;
-                MISSIONS = data.MISSIONS;
-                TRAITS = data.TRAITS || {};
-                ECONOMY = data.ECONOMY || {};
-                REPUTATION = data.REPUTATION || {};
-                RECRUIT_NAMES = data.RECRUIT_NAMES || [];
-                RECRUIT_CALLSIGNS = data.RECRUIT_CALLSIGNS || [];
-                setLoaded(true);
-            })
-            .catch(e => setError(e.message));
-    }, []);
-
-    if (error) return (
-        <div className="fatal-error">
-            FATAL ERROR: {error} <br />
-            (Please ensure you are serving this file via a web server to support JSON fetching)
-        </div>
-    );
-
-    if (!loaded) return (
-        <div className="loading-screen">
-            Pinging HQ... (Loading Assets)
-        </div>
-    );
-
-    return <Game />;
-};
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
