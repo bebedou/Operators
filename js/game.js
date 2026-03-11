@@ -859,8 +859,6 @@ const Game = () => {
                         intervention={intervention}
                         squad={liveSquad}
                         onChoice={handleInterventionChoice}
-                        difficulty={50 + (currentMission.difficulty * 12)}
-                        tacticModifiers={selectedTactic.modifiers}
                     />
                 )}
             </div>

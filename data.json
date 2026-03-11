@@ -157,7 +157,7 @@
                 "minStat": 30,
                 "maxStat": 50,
                 "maxTraits": 1,
-                "recruitCostMult": 1.0,
+                "recruitCostMult": 1,
                 "missionChoices": 2
             },
             {
@@ -390,13 +390,13 @@
                             {
                                 "text": "Rush past to suspect (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": 0
                             },
                             {
                                 "text": "Have rear guard extract child (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": 5
                             }
                         ]
@@ -476,13 +476,13 @@
                             {
                                 "text": "Flash & Grab (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": 0
                             },
                             {
                                 "text": "Precision Shot (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": -10
                             }
                         ]
@@ -557,13 +557,13 @@
                             {
                                 "text": "Methodical advance with masks (Discipline)",
                                 "stat": "discipline",
-                                "slot": 1,
+                                "slot": 0,
                                 "bonus": 10
                             },
                             {
                                 "text": "Send sharpshooter ahead with cover (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 0,
                                 "bonus": 0
                             }
                         ]
@@ -650,13 +650,13 @@
                             {
                                 "text": "Step over and advance (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": -10
                             },
                             {
                                 "text": "Find alternate route (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": 5
                             }
                         ]
@@ -743,13 +743,13 @@
                             {
                                 "text": "Push through the crowd (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": -10
                             },
                             {
                                 "text": "Take alternate route via scaffolding (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": 0
                             }
                         ]
@@ -835,13 +835,13 @@
                             {
                                 "text": "Mark position, push forward (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": 5
                             },
                             {
                                 "text": "Rear guard stays with him (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": 0
                             }
                         ]
@@ -916,13 +916,13 @@
                             {
                                 "text": "Non-lethal takedown (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": 0
                             },
                             {
                                 "text": "Positioned sniper standby (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": 5
                             }
                         ]
@@ -991,13 +991,13 @@
                             {
                                 "text": "Provide covering fire (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 0,
                                 "bonus": 5
                             },
                             {
                                 "text": "Negotiate ceasefire for medic (Discipline)",
                                 "stat": "discipline",
-                                "slot": 1,
+                                "slot": 0,
                                 "bonus": 10
                             }
                         ]
@@ -1090,13 +1090,13 @@
                             {
                                 "text": "Breach closet fast (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": -5
                             },
                             {
                                 "text": "Cover from distance, ask them to come out (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": 5
                             }
                         ]
@@ -1150,7 +1150,7 @@
                             {
                                 "text": "Carry & extract immediately (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": -5
                             }
                         ]
@@ -1231,13 +1231,13 @@
                             {
                                 "text": "Breach while he's distracted (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": 0
                             },
                             {
                                 "text": "Sniper through window from adjacent building (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": -10
                             }
                         ]
@@ -1318,13 +1318,13 @@
                             {
                                 "text": "Skip container, clear others (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 1,
                                 "bonus": 5
                             },
                             {
                                 "text": "Force open from side panel (Reflexes)",
                                 "stat": "reflexes",
-                                "slot": 0,
+                                "slot": 1,
                                 "bonus": -10
                             }
                         ]
@@ -1405,13 +1405,13 @@
                             {
                                 "text": "Signal sniper team (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 0,
                                 "bonus": 5
                             },
                             {
                                 "text": "Evacuate mayor first (Discipline)",
                                 "stat": "discipline",
-                                "slot": 1,
+                                "slot": 0,
                                 "bonus": 15
                             }
                         ]
@@ -1487,13 +1487,13 @@
                             {
                                 "text": "Observe and bypass (Discipline)",
                                 "stat": "discipline",
-                                "slot": 1,
+                                "slot": 0,
                                 "bonus": 10
                             },
                             {
                                 "text": "Cover from hiding, let him leave (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 0,
                                 "bonus": 0
                             }
                         ]
@@ -1553,13 +1553,13 @@
                             {
                                 "text": "Negotiate surrender (Discipline)",
                                 "stat": "discipline",
-                                "slot": 1,
+                                "slot": 0,
                                 "bonus": 15
                             },
                             {
                                 "text": "Sniper through engine room window (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 0,
                                 "bonus": -5
                             }
                         ]
@@ -1633,7 +1633,7 @@
                             {
                                 "text": "Verbal commands to drop weapon (Discipline)",
                                 "stat": "discipline",
-                                "slot": 1,
+                                "slot": 0,
                                 "bonus": 5
                             }
                         ]
@@ -1715,13 +1715,13 @@
                             {
                                 "text": "Announce and demand surrender (Discipline)",
                                 "stat": "discipline",
-                                "slot": 1,
+                                "slot": 0,
                                 "bonus": -5
                             },
                             {
                                 "text": "Non-lethal shot from cover (Aim)",
                                 "stat": "aim",
-                                "slot": 2,
+                                "slot": 0,
                                 "bonus": 0
                             }
                         ]

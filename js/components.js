@@ -150,7 +150,7 @@ const BudgetDisplay = ({ budget }) => (
 );
 
 // --- INTERVENTION OVERLAY ---
-const InterventionOverlay = ({ intervention, squad, onChoice, difficulty, tacticModifiers }) => {
+const InterventionOverlay = ({ intervention, squad, onChoice }) => {
     const [timeLeft, setTimeLeft] = useState(100);
 
     useEffect(() => {
@@ -167,23 +167,6 @@ const InterventionOverlay = ({ intervention, squad, onChoice, difficulty, tactic
         return () => clearInterval(interval);
     }, []);
 
-    const computeOdds = (choice) => {
-        const soldier = squad[choice.slot];
-        if (!soldier || soldier.stats.health <= 0) return { pct: 0, label: '0%', cls: 'odds-low' };
-        const baseStat = soldier.stats[choice.stat] || 0;
-        const tacticMod = (tacticModifiers && tacticModifiers[choice.stat]) || 0;
-        const traitMods = applyTraitStatMods(soldier);
-        const fatiguePenalty = Math.floor((soldier.fatigue || 0) / 2);
-        const stressPenalty = choice.stat === 'discipline' ? Math.floor((soldier.stress || 0) / 3) : 0;
-        const finalSkill = baseStat + tacticMod + (traitMods[choice.stat] || 0) - fatiguePenalty - stressPenalty + (choice.bonus || 0);
-        // Average roll is 50.5 on d100, so expected totalScore = finalSkill + 50.5
-        // Success if totalScore > difficulty, so success chance ~ clamp((finalSkill + 50 - difficulty) / 100, 0, 1)
-        const diff = difficulty || 62;
-        const successChance = clamp(Math.round(((finalSkill + 50 - diff) / 100) * 100), 5, 95);
-        const cls = successChance >= 65 ? 'odds-high' : successChance >= 40 ? 'odds-med' : 'odds-low';
-        return { pct: successChance, label: `${successChance}%`, cls, finalSkill, fatiguePenalty, stressPenalty };
-    };
-
     return (
         <div className="intervention-overlay">
             <div className="intervention-box">
@@ -196,7 +179,6 @@ const InterventionOverlay = ({ intervention, squad, onChoice, difficulty, tactic
                     {intervention.choices.map((choice, idx) => {
                         const soldier = squad[choice.slot];
                         const soldierName = soldier ? soldier.name : 'N/A';
-                        const odds = computeOdds(choice);
                         return (
                             <button
                                 key={idx}
@@ -205,9 +187,6 @@ const InterventionOverlay = ({ intervention, squad, onChoice, difficulty, tactic
                             >
                                 <div className="intervention-btn-text">{choice.text}</div>
                                 <div className="intervention-btn-who">{soldierName} [{choice.stat.toUpperCase()}]</div>
-                                <div className={`intervention-odds ${odds.cls}`} title={`Effective ${choice.stat.toUpperCase()}: ${odds.finalSkill}${odds.fatiguePenalty ? ` (-${odds.fatiguePenalty} FTG)` : ''}${odds.stressPenalty ? ` (-${odds.stressPenalty} STR)` : ''} vs DC ${difficulty || 62}`}>
-                                    {odds.label} chance
-                                </div>
                             </button>
                         );
                     })}
